@@ -1,13 +1,12 @@
 # Simulation_Engine_OpenGL_C++
 
-Currently no proper cross platform support, but you can use it in windows (have the Mingw setup). <br/>
+Currently supports windows and mac. <br/>
 
 I mostly use it as a template for my projects. I have included the GUI library(ImGUI), which I use if needed. </br>
 
 There are a lot of sample project codes, I have worked upon in assets\codeSample.</br> 
 
-Directly run the executable - bin\main  <br/>
-or if you want to compile yourself then I have added the makefile, so you can run the "make" command with proper header files included. (There can be issues during compiling older projects as I have changed the project structure a few times)</br></br>
+If you want to compile yourself then I have added the makefile, so you can run the "make" command with proper header files included. (There can be issues during compiling older projects as I have changed the project structure a few times). For windows dependencies are present within the project, just need to have mingw. For mac, you need to install the dependencies 'brew install sdl2@2.30.10 sdl2_image@2.8.2'. Then final executable will be present in bin folder. You can clean the object files and the executable later with 'make clean'. Sorry for a clumsy readme.</br></br>
 
 
 Showcase of some of those examples I have worked upon : </br> </br>

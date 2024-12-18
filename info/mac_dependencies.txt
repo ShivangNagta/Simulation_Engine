@@ -1,0 +1,6 @@
+Dependencies
+SDL2: v2.30.10
+SDL2_image: v2.8.2
+GLM: v1.0.1
+
+brew install brew install sdl2@2.30.10 sdl2_image@2.8.2

@@ -42,8 +42,8 @@ void main()
 
     // Specular (Blinn Phong)
     vec3 cameraDir = normalize(cameraPos - v_fragPos);
-    vec3 half = normalize(cameraDir + lightDir);
-    float NDotH = max(dot(normal, half), 0.0f);
+    vec3 half_vec = normalize(cameraDir + lightDir);
+    float NDotH = max(dot(normal, half_vec), 0.0f);
     vec3 specular = pow(NDotH, material.shininess) * light.specular * material.specular;
 
 

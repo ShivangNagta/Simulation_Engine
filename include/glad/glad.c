@@ -9191,4 +9191,3 @@ int gladLoadGLLoader(GLADloadproc load) {
 	load_GL_SUN_vertex(load);
 	return GLVersion.major != 0 || GLVersion.minor != 0;
 }
-
