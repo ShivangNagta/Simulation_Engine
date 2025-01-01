@@ -92,38 +92,73 @@ bool Mesh::loadOBJ(const std::string& filename)
 				std::string faceData;
 				int vertexIndex, uvIndex, normalIndex;
 
-				while (ss>>faceData)
+				std::vector<int> faceVertices;
+				std::vector<int> faceUVs;
+				std::vector<int> faceNormals;
+
+				while (ss >> faceData)
 				{
 					std::vector<std::string> data = split(faceData, "/");
 
 					if (data[0].size() > 0)
 					{
 						sscanf(data[0].c_str(), "%d", &vertexIndex);
-						vertexIndices.push_back(vertexIndex);
+						faceVertices.push_back(vertexIndex);
 					}
 
 					if (data.size() >= 1)
 					{
-						// Is face format v//vn?  If data[1] is empty string then
-						// this vertex has no texture coordinate
 						if (data[1].size() > 0)
 						{
 							sscanf(data[1].c_str(), "%d", &uvIndex);
-							uvIndices.push_back(uvIndex);
+							faceUVs.push_back(uvIndex);
 						}
 					}
-					
+
 					if (data.size() >= 2)
 					{
-						// Does this vertex have a normal?
 						if (data[2].size() > 0)
 						{
 							sscanf(data[2].c_str(), "%d", &normalIndex);
-							normalIndices.push_back(normalIndex);
+							faceNormals.push_back(normalIndex);
 						}
 					}
 				}
+
+				// Process the face (triangle or quad)
+				if (faceVertices.size() == 3)
+				{
+					for (int i = 0; i < 3; ++i)
+					{
+						vertexIndices.push_back(faceVertices[i]);
+						if (!faceUVs.empty()) uvIndices.push_back(faceUVs[i]);
+						if (!faceNormals.empty()) normalIndices.push_back(faceNormals[i]);
+					}
+				}
+				else if (faceVertices.size() == 4) {
+					// Triangle 1: vertices 0,1,2
+					for (int i = 0; i < 3; ++i) {
+						vertexIndices.push_back(faceVertices[i]);
+						if (!faceUVs.empty()) uvIndices.push_back(faceUVs[i]);
+						if (!faceNormals.empty()) normalIndices.push_back(faceNormals[i]);
+					}
+					// Triangle 2: vertices 0,2,3
+					vertexIndices.push_back(faceVertices[0]);
+					vertexIndices.push_back(faceVertices[2]);
+					vertexIndices.push_back(faceVertices[3]);
+					if (!faceUVs.empty()) {
+						uvIndices.push_back(faceUVs[0]);
+						uvIndices.push_back(faceUVs[2]);
+						uvIndices.push_back(faceUVs[3]);
+					}
+					if (!faceNormals.empty()) {
+						normalIndices.push_back(faceNormals[0]);
+						normalIndices.push_back(faceNormals[2]);
+						normalIndices.push_back(faceNormals[3]);
+					}
+				}
 			}
+
 		}
 
 		// Close the file

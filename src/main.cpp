@@ -167,7 +167,7 @@ void Input(){
     }
     
     const Uint8 *state = SDL_GetKeyboardState(NULL);
-    float speed = 0.01f;
+    float speed = 0.05f;
     if(state[SDL_SCANCODE_W]){
         g_camera.MoveForward(speed);
     }
@@ -180,24 +180,64 @@ void Input(){
     if(state[SDL_SCANCODE_D]){
         g_camera.MoveRight(speed);
     }
-    if(state[SDL_SCANCODE_SPACE]){
+    if(state[SDL_SCANCODE_E]){
         g_camera.MoveUp(speed);
     }
-    if(state[SDL_SCANCODE_LCTRL]){
+    if(state[SDL_SCANCODE_Q]){
         g_camera.MoveDown(speed);
     }
 }
+
+void RenderBackgroundGradient() {
+    glDisable(GL_DEPTH_TEST);
+    float quadVertices[] = {
+        -1.0f, -1.0f, 0.0f,  
+        1.0f, -1.0f, 0.0f,  
+        -1.0f,  1.0f, 0.0f,  
+        1.0f,  1.0f, 0.0f  
+    };
+
+    ShaderProgram backgroundShader;
+    backgroundShader.LoadShader("./shaders/background/background.vert", "./shaders/background/background.frag");
+    GLuint gGraphicsPipelineShaderProgram = backgroundShader.GetProgramID();
+
+    backgroundShader.Use();
+
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBindVertexArray(0);
+
+
+    backgroundShader.Use();
+
+
+    glm::vec3 topColor(0.5f, 0.7f, 1.0f);   
+    glm::vec3 bottomColor(1.0f, 1.0f, 1.0f);
+    glUniform3fv(glGetUniformLocation(backgroundShader.GetProgramID(), "topColor"), 1, glm::value_ptr(topColor));
+    glUniform3fv(glGetUniformLocation(backgroundShader.GetProgramID(), "bottomColor"), 1, glm::value_ptr(bottomColor));
+
+
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+
+    backgroundShader.Unuse();
+    glEnable(GL_DEPTH_TEST);
+}
+
 
 
 void PreDraw(){
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    ShaderProgram shaderProgram;
-    shaderProgram.LoadShader("./shaders/lighting_dir.vert", "./shaders/lighting_dir.frag");
-    GLuint gGraphicsPipelineShaderProgram = shaderProgram.GetProgramID();
 
-    shaderProgram.Use();
 
     // Model positions
     glm::vec3 modelPos[] = {
@@ -232,8 +272,18 @@ void PreDraw(){
     glm::vec3 cameraPos = g_camera.GetEyePos();
 
     glViewport(0, 0, gScreenWidth, gScreenHeight);
-    glClearColor(0.8f, 0.8f, 0.5f, 1.0f);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    RenderBackgroundGradient();
+    
+
+    ShaderProgram shaderProgram;
+    shaderProgram.LoadShader("./shaders/lighting_dir.vert", "./shaders/lighting_dir.frag");
+    GLuint gGraphicsPipelineShaderProgram = shaderProgram.GetProgramID();
+
+    shaderProgram.Use();
 
     // Set light properties for the shader
     glUniform3f(glGetUniformLocation(gGraphicsPipelineShaderProgram, "cameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
@@ -295,29 +345,6 @@ void PreDraw(){
     }
 
     shaderProgram.Unuse();
-
-    // ShaderProgram lightShader;
-    // lightShader.LoadShader("./shaders/light.vert", "./shaders/light.frag");
-    // GLuint gGraphicsPipelineLightShader = lightShader.GetProgramID();
-
-
-    // // Shader for drawing the actual light source sphere
-    // lightShader.Use();
-
-    // // View Matrix
-    // view = g_camera.GetViewMatrix();
-    // glUniformMatrix4fv(glGetUniformLocation(gGraphicsPipelineLightShader, "u_ViewLight"), 1, GL_FALSE, &view[0][0]);
-
-    // // Perspective Projection
-    // perspective = glm::perspective(glm::radians(45.0f), (float)gScreenWidth / (float)gScreenHeight, 0.1f, 100.0f);
-    // glUniformMatrix4fv(glGetUniformLocation(gGraphicsPipelineLightShader, "u_PerspectiveLight"), 1, GL_FALSE, &perspective[0][0]);
-
-    // // Draw first light
-    // glm::mat4 model = glm::translate(glm::mat4(1.0f), lightPos);
-    // glUniformMatrix4fv(glGetUniformLocation(gGraphicsPipelineLightShader, "u_ModelMatrixLight"), 1, GL_FALSE, &model[0][0]);
-    // GLint u_lightCol = glGetUniformLocation(gGraphicsPipelineLightShader, "lightColor");
-    // glUniform3f(u_lightCol, lightColor.x, lightColor.y, lightColor.z);
-    // lightMesh[0].draw();
 
 
     SDL_GL_SwapWindow(gGraphicsApplicationWindow);
